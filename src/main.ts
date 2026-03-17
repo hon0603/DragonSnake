@@ -68,14 +68,16 @@ class Game {
     this.spContainer = document.getElementById('star-platinum-container')!;
     this.joystickBase = document.getElementById('joystick-base');
     this.joystickStick = document.getElementById('joystick-stick');
-    
     this.initEventListeners();
     this.resizeCanvas();
-    window.addEventListener('resize', () => this.resizeCanvas());
+    this.updateJoystickCenter();
+    window.addEventListener('resize', () => {
+      this.resizeCanvas();
+      this.updateJoystickCenter();
+    });
     this.showMenu();
     this.vortexLoop();
     
-    window.addEventListener('resize', () => this.resizeCanvas());
   }
 
   private resizeCanvas() {
@@ -90,7 +92,6 @@ class Game {
     // Original size was around 800x800 for the 39x39 grid
     let size = Math.min(availableWidth - padding, availableHeight - padding * 3);
     
-    // On desktop, keep a reasonable max size
     if (availableWidth > 768) {
       size = Math.min(size, 800);
     }
@@ -98,21 +99,23 @@ class Game {
     this.canvas.width = size;
     this.canvas.height = size;
     
-    // Update joystick center after resize
-    if (this.joystickBase) {
+    this.vortexCanvas.width = window.innerWidth;
+    this.vortexCanvas.height = window.innerHeight;
+  }
+
+  private updateJoystickCenter() {
+    if (this.joystickBase && window.innerWidth <= 768) {
       const rect = this.joystickBase.getBoundingClientRect();
       this.joystickCenter = {
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2
       };
     }
-    
-    this.vortexCanvas.width = window.innerWidth;
-    this.vortexCanvas.height = window.innerHeight;
   }
 
   private handleJoystickStart(e: TouchEvent) {
     this.isJoystickActive = true;
+    this.updateJoystickCenter(); // Update center just in case of scrolling/layout shifts
     this.handleJoystickMove(e);
   }
 
