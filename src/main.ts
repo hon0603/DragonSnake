@@ -53,6 +53,8 @@ class Game {
   private chronoShrinkStartTime: number = 0;
   private previewIntervals: number[] = [];
   private isGameOver: boolean = false;
+  private gamepadLoopId: number | null = null;
+  private lastGamepadState: { [key: number]: boolean } = {};
 
   constructor() {
     this.canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
@@ -69,6 +71,7 @@ class Game {
     this.joystickBase = document.getElementById('joystick-base');
     this.joystickStick = document.getElementById('joystick-stick');
     this.initEventListeners();
+    this.startGamepadLoop();
     this.resizeCanvas();
     this.updateJoystickCenter();
     window.addEventListener('resize', () => {
@@ -152,6 +155,56 @@ class Game {
     if (this.joystickStick) {
       this.joystickStick.style.transform = 'translate(-50%, -50%)';
     }
+  }
+
+  private startGamepadLoop() {
+    const poll = () => {
+      this.pollGamepad();
+      this.gamepadLoopId = requestAnimationFrame(poll);
+    };
+    poll();
+  }
+
+  private pollGamepad() {
+    const gamepads = navigator.getGamepads();
+    for (const gp of gamepads) {
+      if (!gp) continue;
+
+      // D-Pad Mapping (Standard mapping: indexing 12 to 15)
+      // Buttons: 0: A, 1: B, 9: Start
+      
+      // Directions (Left Stick & D-Pad)
+      const axes = gp.axes;
+      const buttons = gp.buttons;
+      
+      if (!this.aiEnabled && !this.paused && !this.isGameOver && this.snake) {
+          // Left Stick (Axes 0, 1)
+          if (axes[1] < -0.5 || buttons[12].pressed) this.snake.setDirection({ x: 0, y: -1 }); // Up
+          else if (axes[1] > 0.5 || buttons[13].pressed) this.snake.setDirection({ x: 0, y: 1 }); // Down
+          else if (axes[0] < -0.5 || buttons[14].pressed) this.snake.setDirection({ x: -1, y: 0 }); // Left
+          else if (axes[0] > 0.5 || buttons[15].pressed) this.snake.setDirection({ x: 1, y: 0 }); // Right
+      }
+
+      // Buttons (Edge Detection)
+      this.handleGamepadButton(0, buttons[0].pressed, () => this.activateSkill()); // A
+      this.handleGamepadButton(1, buttons[1].pressed, () => this.handleBackButton()); // B
+      this.handleGamepadButton(9, buttons[9].pressed, () => this.togglePause()); // Start
+    }
+  }
+
+  private handleGamepadButton(index: number, isPressed: boolean, callback: () => void) {
+    if (isPressed && !this.lastGamepadState[index]) {
+      callback();
+    }
+    this.lastGamepadState[index] = isPressed;
+  }
+
+  private handleBackButton() {
+      if (this.isGameOver) {
+          this.showMenu();
+      } else if (!document.getElementById('overlay')?.classList.contains('hidden')) {
+          // If in menu, maybe do nothing or specialized back logic
+      }
   }
   
   private initEventListeners() {

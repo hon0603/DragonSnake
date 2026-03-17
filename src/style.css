@@ -594,13 +594,80 @@ main {
 }
 
 @media (max-width: 1180px) {
-  #ability-dashboard {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(10, 10, 30, 0.95);
-    width: 240px;
+  /* Force dashboard to be horizontal at the top for ALL small screens */
+  aside#ability-dashboard {
+    position: fixed !important;
+    top: 95px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: calc(100% - 20px) !important;
+    height: 85px !important;
+    min-height: 85px !important;
+    max-height: 85px !important;
+    flex-direction: row !important;
+    display: flex !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    z-index: 1000 !important;
+    background: rgba(10, 10, 30, 0.95) !important;
+    padding: 5px !important;
+    gap: 8px !important;
+    transform: none !important;
+    border: 1px solid var(--primary) !important;
+    border-radius: 4px !important;
+    align-items: center !important;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3) !important;
+    visibility: visible !important;
+  }
+
+  aside#ability-dashboard .dashboard-title {
+    writing-mode: vertical-lr !important;
+    text-align: center !important;
+    padding: 0 4px !important;
+    border-bottom: none !important;
+    border-right: 2px solid var(--secondary) !important;
+    margin: 0 !important;
+    font-size: 0.6rem !important;
+    flex-shrink: 0 !important;
+    color: var(--secondary) !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  aside#ability-dashboard #ability-list {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    padding: 0 5px !important;
+    width: auto !important;
+    height: 100% !important;
+  }
+
+  aside#ability-dashboard .ability-item {
+    min-width: 150px !important;
+    padding: 4px !important;
+    flex-shrink: 0 !important;
+    height: 70px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    background: rgba(0, 255, 255, 0.1) !important;
+    border: 1px solid rgba(0, 255, 255, 0.3) !important;
+  }
+
+  aside#ability-dashboard .ability-desc {
+    display: none !important;
+  }
+
+  aside#ability-dashboard .ability-name {
+    font-size: 0.7rem !important;
+    margin-bottom: 2px !important;
+    color: #fff !important;
   }
 }
 
@@ -776,6 +843,7 @@ main {
     touch-action: none;
   }
 
+  /* Mobile specific header/main tweaks */
   header {
     padding: 10px;
     gap: 8px;
@@ -788,89 +856,20 @@ main {
     min-width: 120px;
   }
 
-  #score {
-    font-size: 1.8rem;
-  }
-
   main {
-    flex-direction: column;
-    padding: 10px;
-    gap: 15px;
-    align-items: stretch; /* Allow controls to use full width */
-    overflow-y: auto;
-  }
-
-  /* Portrait specific: Evolution dashboard above game */
-  @media (orientation: portrait) {
-    #ability-dashboard {
-      position: fixed !important;
-      top: calc(80px + var(--safe-area-inset-top, 0px)) !important;
-      left: 10px !important;
-      right: 10px !important;
-      width: calc(100% - 20px) !important;
-      height: 90px !important;
-      max-height: 90px !important;
-      flex-direction: row !important;
-      overflow-x: auto !important;
-      overflow-y: hidden !important;
-      z-index: 1000 !important;
-      background: rgba(10, 10, 30, 0.9) !important;
-      padding: 5px !important;
-      gap: 8px !important;
-      transform: none !important;
-    }
-
-    .dashboard-title {
-      writing-mode: vertical-lr;
-      text-align: center;
-      padding: 0 4px;
-      border-bottom: none !important;
-      border-right: 2px solid var(--secondary);
-      margin: 0;
-      font-size: 0.6rem;
-      flex-shrink: 0;
-    }
-
-    #ability-list {
-      display: flex !important;
-      flex-direction: row !important;
-      gap: 8px;
-      flex-wrap: nowrap;
-      align-items: center;
-    }
-
-    .ability-item {
-      min-width: 160px;
-      padding: 4px;
-      flex-shrink: 0;
-      height: 100%;
-    }
-
-    .ability-desc {
-      display: none !important;
-    }
-
-    .ability-name {
-      font-size: 0.75rem;
-      margin-bottom: 2px;
-    }
-
-    #game-canvas {
-      margin-top: 60px; /* Push game down to avoid overlap with dashboard */
-    }
+    flex-direction: column !important;
+    padding: 10px !important;
+    gap: 15px !important;
+    align-items: center !important;
+    overflow-y: auto !important;
+    padding-top: 105px !important; /* Space for the fixed dashboard */
   }
 
   #game-canvas {
-    max-width: 100%;
+    max-width: 100% !important;
     height: auto !important;
-    aspect-ratio: 1/1;
-  }
-
-  #ability-dashboard {
-    width: 100% !important;
-    order: 2;
-    padding: 10px;
-    margin: 0;
+    aspect-ratio: 1/1 !important;
+    margin: 0 !important;
   }
 
   .controls button {
