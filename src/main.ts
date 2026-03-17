@@ -27,7 +27,14 @@ class Game {
   private paused: boolean = false;
   private aiEnabled: boolean = false;
   private gameLoopId: number | null = null;
-  private currentSkin: SkinType = 'pixel';
+  private currentSkin: SkinType = 'rainbow';
+  private spContainer: HTMLElement;
+  
+  // Mobile/Joystick properties
+  private joystickBase: HTMLElement | null = null;
+  private joystickStick: HTMLElement | null = null;
+  private isJoystickActive: boolean = false;
+  private joystickCenter = { x: 0, y: 0 };
   private speed: number = INITIAL_SPEED;
   private fireworks: FireworkManager = new FireworkManager();
   private soundManager: SoundManager = new SoundManager();
@@ -42,7 +49,6 @@ class Game {
   private abilityList!: HTMLElement;
   private jojoNotification!: HTMLElement;
   private jojoTimer!: HTMLElement;
-  private spContainer!: HTMLElement;
   private chronoStartTime: number = 0;
   private chronoShrinkStartTime: number = 0;
   private previewIntervals: number[] = [];
@@ -60,9 +66,12 @@ class Game {
     this.jojoNotification = document.getElementById('jojo-notification')!;
     this.jojoTimer = this.jojoNotification.querySelector('.jojo-timer')!;
     this.spContainer = document.getElementById('star-platinum-container')!;
+    this.joystickBase = document.getElementById('joystick-base');
+    this.joystickStick = document.getElementById('joystick-stick');
     
-    this.resizeCanvas();
     this.initEventListeners();
+    this.resizeCanvas();
+    window.addEventListener('resize', () => this.resizeCanvas());
     this.showMenu();
     this.vortexLoop();
     
@@ -70,15 +79,78 @@ class Game {
   }
 
   private resizeCanvas() {
-    const parent = this.canvas.parentElement!;
-    const size = Math.min(parent.clientWidth, parent.clientHeight, 600);
+    const container = document.getElementById('app');
+    if (!container) return;
+    
+    const availableWidth = window.innerWidth;
+    const availableHeight = window.innerHeight;
+    const padding = 40;
+    
+    // Calculate the best size that fits the screen while maintaining aspect ratio
+    // Original size was around 800x800 for the 39x39 grid
+    let size = Math.min(availableWidth - padding, availableHeight - padding * 3);
+    
+    // On desktop, keep a reasonable max size
+    if (availableWidth > 768) {
+      size = Math.min(size, 800);
+    }
+
     this.canvas.width = size;
     this.canvas.height = size;
+    
+    // Update joystick center after resize
+    if (this.joystickBase) {
+      const rect = this.joystickBase.getBoundingClientRect();
+      this.joystickCenter = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      };
+    }
     
     this.vortexCanvas.width = window.innerWidth;
     this.vortexCanvas.height = window.innerHeight;
   }
 
+  private handleJoystickStart(e: TouchEvent) {
+    this.isJoystickActive = true;
+    this.handleJoystickMove(e);
+  }
+
+  private handleJoystickMove(e: TouchEvent) {
+    if (!this.isJoystickActive || !this.joystickStick || this.aiEnabled) return;
+    e.preventDefault();
+    
+    const touch = e.touches[0];
+    const dx = touch.clientX - this.joystickCenter.x;
+    const dy = touch.clientY - this.joystickCenter.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const maxRadius = 40;
+    
+    const clampedDistance = Math.min(distance, maxRadius);
+    const angle = Math.atan2(dy, dx);
+    
+    const stickX = Math.cos(angle) * clampedDistance;
+    const stickY = Math.sin(angle) * clampedDistance;
+    
+    this.joystickStick.style.transform = `translate(calc(-50% + ${stickX}px), calc(-50% + ${stickY}px))`;
+    
+    // Set direction if moved significantly
+    if (distance > 10) {
+      if (Math.abs(dx) > Math.abs(dy)) {
+        this.snake.setDirection({ x: dx > 0 ? 1 : -1, y: 0 });
+      } else {
+        this.snake.setDirection({ x: 0, y: dy > 0 ? 1 : -1 });
+      }
+    }
+  }
+
+  private handleJoystickEnd() {
+    this.isJoystickActive = false;
+    if (this.joystickStick) {
+      this.joystickStick.style.transform = 'translate(-50%, -50%)';
+    }
+  }
+  
   private initEventListeners() {
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
@@ -90,6 +162,19 @@ class Game {
         case 'Z': this.activateSkill(); break;
       }
     });
+
+    // Mobile specific events
+    const skillBtn = document.getElementById('mobile-skill-btn');
+    skillBtn?.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      this.activateSkill();
+    });
+
+    if (this.joystickBase) {
+      this.joystickBase.addEventListener('touchstart', (e) => this.handleJoystickStart(e));
+      window.addEventListener('touchmove', (e) => this.handleJoystickMove(e), { passive: false });
+      window.addEventListener('touchend', () => this.handleJoystickEnd());
+    }
 
     document.getElementById('start-btn')?.addEventListener('click', () => this.startGame());
     document.getElementById('restart-btn')?.addEventListener('click', () => this.startGame());
