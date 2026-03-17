@@ -1,4 +1,7 @@
 export class SoundManager {
+  private ctx: AudioContext | null = null;
+  private bgm: HTMLAudioElement | null = null;
+  private isMuted: boolean = false;
   private bgmStopped: boolean = false;
   private tickingInterval: number | null = null;
 

@@ -33,7 +33,6 @@ class Game {
   private soundManager: SoundManager = new SoundManager();
   
   private lastMilestoneScore: number = 0;
-  private lastEvoScore: number = 0;
   private isEvoSpawning: boolean = false;
   private chronoEffectRadius: number = 0;
   private chronoEffectExpanding: boolean = false;
@@ -173,7 +172,6 @@ class Game {
     this.score = 0;
     this.itemsEaten = 0;
     this.lastMilestoneScore = 0;
-    this.lastEvoScore = 0;
     this.isEvoSpawning = false;
     this.isGameOver = false;
     this.speed = INITIAL_SPEED;
