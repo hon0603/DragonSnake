@@ -490,7 +490,12 @@ class Game {
 
     let chipIndex = -1;
     for (let i = 0; i < this.chips.length; i++) {
-        if (head.x === this.chips[i].pos.x && head.y === this.chips[i].pos.y) {
+        const chip = this.chips[i];
+        // Increase collision range by 1 grid unit (Manhattan distance <= 1)
+        const dx = Math.abs(head.x - chip.pos.x);
+        const dy = Math.abs(head.y - chip.pos.y);
+        // If distance is <= 1, it's considered eaten (forgiving collision)
+        if ((dx === 0 && dy === 0) || (dx + dy <= 1)) {
             chipIndex = i;
             break;
         }
@@ -945,15 +950,30 @@ class Game {
       const isLocked = level < ability.level;
       const isActive = level === ability.level || (level > ability.level && ability.level > 0);
       
+      // Determine if the skill is actually "READY" to be used (for active skills)
+      let isReady = false;
+      if (!isLocked && ability.usage !== 'PASSIVE') {
+          if (skin === 'pixel' && ability.level === 3) {
+              isReady = this.snake.chronoStopReady && !this.snake.chronoStopActive;
+          } else if (skin === 'pixel' && ability.level === 2) {
+              isReady = this.snake.armorReady;
+          } else if (ability.level === 3 && skin === 'dragon') {
+              isReady = this.snake.goldChipCounter >= 5;
+          } else if (ability.usage.includes('COOLDOWN') || ability.usage === 'READY') {
+              // General check for energy-based active skills
+              isReady = this.snake.energy >= 50 && !this.snake.isSkillActive;
+          }
+      }
+
       html += `
-        <div class="ability-item ${isLocked ? 'locked' : 'active'}">
+        <div class="ability-item ${isLocked ? 'locked' : ''} ${isReady ? 'ready' : (isActive ? 'active' : '')}">
           <div class="ability-stage">STAGE ${ability.level} ${isLocked ? '[LOCKED]' : '[ACTIVE]'}</div>
           <div class="ability-name">
             ${ability.name}
-            ${isActive && !isLocked ? '<span class="ability-status">ONLINE</span>' : ''}
+            ${isActive && !isLocked ? `<span class="ability-status" style="${isReady ? 'background: #fff; color: #000;' : ''}">${isReady ? 'READY' : 'ONLINE'}</span>` : ''}
           </div>
           <div class="ability-desc">${ability.desc}</div>
-          <div class="ability-usage">${ability.usage}</div>
+          <div class="ability-usage" style="${isReady ? 'color: #fff; text-shadow: 0 0 10px #0ff;' : ''}">${ability.usage}</div>
           ${ability.value !== undefined ? `
             <div class="ability-progress-container">
               <div class="ability-progress-bar ${ability.value <= 0 ? 'ready' : ''}" style="width: ${Math.min(100, (1 - ability.value) * 100)}%"></div>
