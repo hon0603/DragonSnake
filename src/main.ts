@@ -53,7 +53,6 @@ class Game {
   private chronoShrinkStartTime: number = 0;
   private previewIntervals: number[] = [];
   private isGameOver: boolean = false;
-  private gamepadLoopId: number | null = null;
   private lastGamepadState: { [key: number]: boolean } = {};
 
   constructor() {
@@ -160,7 +159,7 @@ class Game {
   private startGamepadLoop() {
     const poll = () => {
       this.pollGamepad();
-      this.gamepadLoopId = requestAnimationFrame(poll);
+      requestAnimationFrame(poll);
     };
     poll();
   }
