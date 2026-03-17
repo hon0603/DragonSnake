@@ -30,11 +30,7 @@ class Game {
   private currentSkin: SkinType = 'rainbow';
   private spContainer: HTMLElement;
   
-  // Mobile/Joystick properties
-  private joystickBase: HTMLElement | null = null;
-  private joystickStick: HTMLElement | null = null;
-  private isJoystickActive: boolean = false;
-  private joystickCenter = { x: 0, y: 0 };
+  // Mobile/D-Pad properties
   private speed: number = INITIAL_SPEED;
   private fireworks: FireworkManager = new FireworkManager();
   private soundManager: SoundManager = new SoundManager();
@@ -67,15 +63,12 @@ class Game {
     this.jojoNotification = document.getElementById('jojo-notification')!;
     this.jojoTimer = this.jojoNotification.querySelector('.jojo-timer')!;
     this.spContainer = document.getElementById('star-platinum-container')!;
-    this.joystickBase = document.getElementById('joystick-base');
-    this.joystickStick = document.getElementById('joystick-stick');
     this.initEventListeners();
+    this.initDPadControls();
     this.startGamepadLoop();
     this.resizeCanvas();
-    this.updateJoystickCenter();
     window.addEventListener('resize', () => {
       this.resizeCanvas();
-      this.updateJoystickCenter();
     });
     this.showMenu();
     this.vortexLoop();
@@ -105,55 +98,27 @@ class Game {
     this.vortexCanvas.height = window.innerHeight;
   }
 
-  private updateJoystickCenter() {
-    if (this.joystickBase && window.innerWidth <= 1180) {
-      const rect = this.joystickBase.getBoundingClientRect();
-      this.joystickCenter = {
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2
-      };
-    }
-  }
+  private initDPadControls() {
+    const directions: { [key: string]: { x: number, y: number } } = {
+      'dpad-up': { x: 0, y: -1 },
+      'dpad-down': { x: 0, y: 1 },
+      'dpad-left': { x: -1, y: 0 },
+      'dpad-right': { x: 1, y: 0 }
+    };
 
-  private handleJoystickStart(e: TouchEvent) {
-    this.isJoystickActive = true;
-    this.updateJoystickCenter(); // Update center just in case of scrolling/layout shifts
-    this.handleJoystickMove(e);
-  }
-
-  private handleJoystickMove(e: TouchEvent) {
-    if (!this.isJoystickActive || !this.joystickStick || this.aiEnabled) return;
-    e.preventDefault();
-    
-    const touch = e.touches[0];
-    const dx = touch.clientX - this.joystickCenter.x;
-    const dy = touch.clientY - this.joystickCenter.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const maxRadius = 40;
-    
-    const clampedDistance = Math.min(distance, maxRadius);
-    const angle = Math.atan2(dy, dx);
-    
-    const stickX = Math.cos(angle) * clampedDistance;
-    const stickY = Math.sin(angle) * clampedDistance;
-    
-    this.joystickStick.style.transform = `translate(calc(-50% + ${stickX}px), calc(-50% + ${stickY}px))`;
-    
-    // Set direction if moved significantly
-    if (distance > 10) {
-      if (Math.abs(dx) > Math.abs(dy)) {
-        this.snake.setDirection({ x: dx > 0 ? 1 : -1, y: 0 });
-      } else {
-        this.snake.setDirection({ x: 0, y: dy > 0 ? 1 : -1 });
+    Object.entries(directions).forEach(([id, dir]) => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        const handler = (e: Event) => {
+          e.preventDefault();
+          if (!this.aiEnabled && !this.paused && !this.isGameOver && this.snake) {
+            this.snake.setDirection(dir);
+          }
+        };
+        btn.addEventListener('touchstart', handler);
+        btn.addEventListener('click', handler);
       }
-    }
-  }
-
-  private handleJoystickEnd() {
-    this.isJoystickActive = false;
-    if (this.joystickStick) {
-      this.joystickStick.style.transform = 'translate(-50%, -50%)';
-    }
+    });
   }
 
   private startGamepadLoop() {
@@ -224,12 +189,10 @@ class Game {
       e.preventDefault();
       this.activateSkill();
     });
-
-    if (this.joystickBase) {
-      this.joystickBase.addEventListener('touchstart', (e) => this.handleJoystickStart(e));
-      window.addEventListener('touchmove', (e) => this.handleJoystickMove(e), { passive: false });
-      window.addEventListener('touchend', () => this.handleJoystickEnd());
-    }
+    skillBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.activateSkill();
+    });
 
     document.getElementById('start-btn')?.addEventListener('click', () => this.startGame());
     document.getElementById('start-btn')?.addEventListener('touchstart', (e) => {
