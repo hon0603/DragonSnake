@@ -593,7 +593,7 @@ main {
   z-index: 10;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1180px) {
   #ability-dashboard {
     position: absolute;
     right: 20px;
@@ -766,7 +766,7 @@ main {
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1180px) {
   .mobile-only {
     display: flex;
   }
@@ -797,6 +797,67 @@ main {
     padding: 10px;
     gap: 15px;
     align-items: stretch; /* Allow controls to use full width */
+    overflow-y: auto;
+  }
+
+  /* Portrait specific: Evolution dashboard above game */
+  @media (orientation: portrait) {
+    #ability-dashboard {
+      position: fixed !important;
+      top: calc(80px + var(--safe-area-inset-top, 0px)) !important;
+      left: 10px !important;
+      right: 10px !important;
+      width: calc(100% - 20px) !important;
+      height: 90px !important;
+      max-height: 90px !important;
+      flex-direction: row !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      z-index: 1000 !important;
+      background: rgba(10, 10, 30, 0.9) !important;
+      padding: 5px !important;
+      gap: 8px !important;
+      transform: none !important;
+    }
+
+    .dashboard-title {
+      writing-mode: vertical-lr;
+      text-align: center;
+      padding: 0 4px;
+      border-bottom: none !important;
+      border-right: 2px solid var(--secondary);
+      margin: 0;
+      font-size: 0.6rem;
+      flex-shrink: 0;
+    }
+
+    #ability-list {
+      display: flex !important;
+      flex-direction: row !important;
+      gap: 8px;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+
+    .ability-item {
+      min-width: 160px;
+      padding: 4px;
+      flex-shrink: 0;
+      height: 100%;
+    }
+
+    .ability-desc {
+      display: none !important;
+    }
+
+    .ability-name {
+      font-size: 0.75rem;
+      margin-bottom: 2px;
+    }
+
+    #game-canvas {
+      margin-top: 60px; /* Push game down to avoid overlap with dashboard */
+    }
   }
 
   #game-canvas {
@@ -827,6 +888,7 @@ main {
     height: 110px;
     z-index: 999; /* Ensure high z-index */
     pointer-events: auto;
+    touch-action: none; /* Prevent browser gestures */
   }
 
   #joystick-base {
@@ -869,6 +931,7 @@ main {
     border: 2px solid var(--accent);
     color: var(--accent);
     pointer-events: auto;
+    touch-action: none; /* Prevent browser gestures */
   }
 
   #mobile-skill-btn:active {

@@ -104,7 +104,7 @@ class Game {
   }
 
   private updateJoystickCenter() {
-    if (this.joystickBase && window.innerWidth <= 768) {
+    if (this.joystickBase && window.innerWidth <= 1180) {
       const rect = this.joystickBase.getBoundingClientRect();
       this.joystickCenter = {
         x: rect.left + rect.width / 2,
@@ -180,7 +180,15 @@ class Game {
     }
 
     document.getElementById('start-btn')?.addEventListener('click', () => this.startGame());
+    document.getElementById('start-btn')?.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      this.startGame();
+    });
     document.getElementById('restart-btn')?.addEventListener('click', () => this.startGame());
+    document.getElementById('restart-btn')?.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      this.startGame();
+    });
     document.getElementById('pause-btn')?.addEventListener('click', () => this.togglePause());
     document.getElementById('ai-toggle')?.addEventListener('click', () => this.toggleAI());
     document.getElementById('audio-toggle')?.addEventListener('click', () => this.toggleAudio());
