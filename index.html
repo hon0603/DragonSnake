@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DRAGON SNAKE | 神龍貪食蛇</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#00ffff">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Orbitron:wght@400;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <canvas id="vortex-canvas"></canvas>
+    <div id="app">
+      <div id="star-platinum-container">
+        <div class="star-platinum-ghost ghost-1"></div>
+        <div class="star-platinum-ghost ghost-2"></div>
+        <div class="star-platinum-main"></div>
+      </div>
+      <div id="ui-layer">
+        <header>
+          <div class="score-container">
+            <span class="label">DATA HARVEST | 分數</span>
+            <span id="score">0</span>
+          </div>
+          <div class="energy-container">
+            <span class="label">CORE LOAD | 能量</span>
+            <div id="energy-bar">
+              <div id="energy-fill"></div>
+            </div>
+            <span class="label small">PRESS [Z] FOR OVERDRIVE</span>
+          </div>
+          <div class="controls">
+            <button id="ai-toggle" class="glass-btn">AI AUTO-PILOT</button>
+            <button id="audio-toggle" class="glass-btn">🔊</button>
+            <button id="pause-btn" class="glass-btn">PAUSE</button>
+          </div>
+        </header>
+
+        <main>
+          <canvas id="game-canvas"></canvas>
+          
+          <aside id="ability-dashboard" class="hidden">
+            <h2 class="dashboard-title">EVOLUTION DATA | 進化數據</h2>
+            <div id="ability-list">
+              <!-- Abilities will be injected here -->
+            </div>
+          </aside>
+
+          <div id="overlay">
+            <div id="menu" class="glass-card">
+              <h1 class="game-title" data-text="DRAGON SNAKE">DRAGON SNAKE</h1>
+              <h2 class="sub-title">神龍貪食蛇</h2>
+              <p class="subtitle">SELECT YOUR AGENT | 選擇守護龍</p>
+              
+              <div class="skin-selection">
+                <div class="skin-option active" data-skin="pixel">
+                  <canvas class="skin-preview-canvas" width="80" height="80"></canvas>
+                  <span>CLASSIC PIXEL | 原始像素</span>
+                </div>
+                <div class="skin-option" data-skin="dragon">
+                  <canvas class="skin-preview-canvas" width="80" height="80"></canvas>
+                  <span>GOLDEN DRAGON | 黃金龍</span>
+                </div>
+                <div class="skin-option" data-skin="rainbow">
+                  <canvas class="skin-preview-canvas" width="80" height="80"></canvas>
+                  <span>RAINBOW DRAGON | 彩虹龍</span>
+                </div>
+              </div>
+
+              <button id="start-btn" class="primary-btn">INITIALIZE | 進入遊戲</button>
+            </div>
+
+            <div id="game-over" class="glass-card hidden">
+              <h1 class="game-title">系統離線</h1>
+              <p class="subtitle">連線中斷 | 分數: <span id="final-score">0</span></p>
+              
+              <div id="submit-section">
+                <input type="text" id="player-name" placeholder="輸入特工代號" maxlength="10">
+                <button id="submit-btn" class="primary-btn">上傳數據</button>
+              </div>
+
+              <div class="leaderboard">
+                <h2>核心排行榜</h2>
+                <ul id="leaderboard-list" class="leaderboard-list">
+                  <!-- 排名將由 JS 生成 -->
+                </ul>
+              </div>
+
+              <button id="restart-btn" class="primary-btn">重啟系統</button>
+            </div>
+          </div>
+        </main>
+
+        <footer id="milestone-notify"></footer>
+        
+        <div id="jojo-notification">
+          <div class="jojo-text">白金之星 世界</div>
+          <div class="jojo-timer"></div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registered:', reg.scope))
+            .catch(err => console.log('Service Worker registration failed:', err));
+        });
+      }
+    </script>
+  </body>
+</html>
